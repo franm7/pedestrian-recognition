@@ -49,7 +49,7 @@ def process_test_set():
     # Paths
     source_images_path = "datasets/images/val/caltechpedestriandataset"
     source_labels_path = "datasets/labels/val/caltechpedestriandataset"
-    destination_path = "dataset/test"
+    destination_path = "../dataset/test"
     destination_examples_path = os.path.join(destination_path, "examples")
     destination_annotations_path = os.path.join(destination_path, "annotations")
     
@@ -102,7 +102,7 @@ def process_val_set():
     # Paths
     source_images_path = "datasets/images/val/caltechpedestriandataset"
     source_labels_path = "datasets/labels/val/caltechpedestriandataset"
-    destination_path = "dataset/val"
+    destination_path = "../dataset/val"
     destination_examples_path = os.path.join(destination_path, "examples")
     destination_annotations_path = os.path.join(destination_path, "annotations")
     
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     # Paths
     input_image_dir = "datasets/images/train/caltechpedestriandataset"
     input_label_dir = "datasets/labels/train/caltechpedestriandataset"
-    output_dir = "dataset"
+    output_dir = "../dataset"
 
     # Create folder structure
     create_folder_structure(output_dir)

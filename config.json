@@ -1,0 +1,14 @@
+{
+    "data": {
+        "path": "dataset",
+        "batch_size": 16,
+        "num_workers": 4
+    },
+    "model": {
+        "learning_rate": 0.001
+    },
+    "training": {
+        "epochs": 100,
+        "save_dir": "checkpoints"
+    }
+}
