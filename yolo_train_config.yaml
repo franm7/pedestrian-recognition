@@ -1,0 +1,6 @@
+train: ./dataset/images/train  # Path to training images
+val: ./dataset/images/val      # Path to validation images
+test: ./dataset/images/test    # Path to test images (maybe i can delete this line)
+
+nc: 1  # Number of classes
+names: ['pedestrian']  # Class names

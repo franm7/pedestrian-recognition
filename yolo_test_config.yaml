@@ -1,0 +1,5 @@
+train: ./dummy_train_path
+val: ./dataset/images/test
+
+nc: 1  # Number of classes
+names: ['pedestrian']  # Class names
