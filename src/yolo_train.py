@@ -1,60 +1,73 @@
 from ultralytics import YOLO
 import torch
 import os
+import csv
 
 # TODO: explore and implement option for resuming model training
-def train_yolo(model_version, epochs=20, batch_size=16, imgsz=640, pretrained=True):
-    experiment_name = f"{model_version}_bs{batch_size}"
-
-    if pretrained:
-      model_version += ".pt"
-      experiment_name += "_pretrained"
-    else:
-      model_version += ".yaml"
-      experiment_name += "_from_scratch"
+def train_yolo(model_name, epochs=30, batch_size=16, imgsz=640, pretrained=True, evaluate_on_test=True):
+    experiment_name = f"{model_name}_bs{batch_size}"
+    experiment_name += "_pretrained" if pretrained else "_from_scratch"
+    model_version = model_name + (".pt" if pretrained else ".yaml")
 
     model = YOLO(model_version)
     
     model.train(
-      data="./yolo_train_config.yaml",  # Path to the dataset config file
+      data="./yolo_config.yaml",  # Path to the dataset config file
       epochs=epochs,
       batch=batch_size,
       imgsz=imgsz,
       workers=4,
       device=0 if torch.cuda.is_available() else "cpu",
+      pretrained=pretrained,
       project="runs/train",  # Output directory for training runs
       name=experiment_name
     )
 
-    # evaluate on test dataset
-    # val automatically uses parameters from train and uses model from best epoch
-    # maybe make batch size bigger for test set?
-    model.val(
-      data="./yolo_test_config.yaml",
-      project="runs/test",
+    if evaluate_on_test:
+      evaluate_yolo(model, model_name, split="test", batch_size=batch_size, imgsz=imgsz, pretrained=pretrained)
+
+def evaluate_yolo(model, model_name, split="test", batch_size=16, imgsz=640, pretrained=True, save_json=True, save_plots=True):
+    experiment_name = f"{model_name}_bs{batch_size}"
+    experiment_name += "_pretrained" if pretrained else "_from_scratch"
+
+    metrics = model.val(
+      data="./yolo_config.yaml",
+      batch=batch_size,
+      imgsz=imgsz,
+      split=split,
+      save_json=save_json,
+      plots=save_plots,
+      project=f"runs/{split}",
       name=experiment_name
     )
 
+    results_data = [
+      ["Metric", "Value"],
+      ["Precision", metrics.box.p],
+      ["Recall", metrics.box.r],
+      ["mAP@50", metrics.box.map50],
+      ["mAP@50-95", metrics.box.map]
+    ]
+
+    results_file = f"./runs/{split}/{experiment_name}/results.csv"
+    with open(results_file, mode='w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerows(results_data)
+    
+    print(f"Results of {split} set successfully saved to: {results_file}")
+
 if __name__ == "__main__":
-    train_yolo("yolo11s", batch_size=32)
-
+    # train_yolo("yolo11s", batch_size=32)
+    
     # load model
+    base_path = os.getcwd()
+    model_path = os.path.join(base_path, "./runs/train/yolo11s_bs32_pretrained/weights/best.pt")
+    model = YOLO(model_path)
+
+    evaluate_yolo(model, "yolo11s", batch_size=32)
+
+    # # Perform object detection on a specific image
     # base_path = os.getcwd()
-    # model_path = os.path.join(base_path, "runs/train/yolo11s_bs32_pretrained/weights/best.pt")
-    # model = YOLO(model_path)
-    # # Perform object detection on an image
-    # image_path = os.path.join(base_path, "datasets/dataset/images/test/set06_V002_0063.png")
+    # image_path = os.path.join(base_path, r"src\set03_V008_0486.png")
     # results = model(image_path)
-    # import matplotlib.pyplot as plt
-    # import cv2
-
-    # # Assuming results[0].plot() gives you the annotated image in OpenCV format
-    # image = results[0].plot()
-
-    # # Convert image from BGR to RGB (OpenCV loads images in BGR format)
-    # image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-    # # Display using matplotlib
-    # plt.imshow(image_rgb)
-    # plt.axis('off')  # Hide axis
-    # plt.show()
+    # results[0].show()
