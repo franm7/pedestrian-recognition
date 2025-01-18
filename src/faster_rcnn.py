@@ -12,6 +12,9 @@ from pathlib import Path
 import ssl
 
 
+
+
+
 # Custom dataset class
 class PedestrianDataset(Dataset):
 
@@ -106,7 +109,7 @@ def train_one_epoch(model, optimizer, data_loader, device):
 
 def evaluate(model, data_loader, device):
 
-    model.eval()
+    #model.eval()
 
     with torch.no_grad():
         total_loss = 0
@@ -115,8 +118,15 @@ def evaluate(model, data_loader, device):
             targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
             loss_dict = model(images, targets)
-            losses = sum(loss for loss in loss_dict.values())
-            total_loss += losses.item()
+            #losses = sum(loss for loss in loss_dict.values())
+            #total_loss += losses.item()
+
+            if isinstance(loss_dict, dict):  # Ensure it is not a list
+                losses = sum(loss for loss in loss_dict.values())
+                total_loss += losses.item()
+            else:
+                raise TypeError(f"Expected loss_dict to be a dict, but got {type(loss_dict)}")
+
 
     return total_loss / len(data_loader)
 
@@ -136,15 +146,34 @@ def main():
     train_dataset = PedestrianDataset(train_imgs, train_labels, transforms=get_transform())
     val_dataset = PedestrianDataset(val_imgs, val_labels, transforms=get_transform())
 
+
+
+
+    #img, target = train_dataset[0]
+
+    #print("Image shape:", img.shape)
+    #print("Target keys:", target.keys())
+    #print("Boxes:", target["boxes"])
+    #print("Labels:", target["labels"])
+    #print("Image ID:", target["image_id"])
+    #print("Area:", target["area"])
+    #print("Iscrowd:", target["iscrowd"])
+
+
+
+
     train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True, collate_fn=lambda x: tuple(zip(*x)))
     val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False, collate_fn=lambda x: tuple(zip(*x)))
+
+
+
 
     num_classes = 1  
 
     # Hyperparameter
     learning_rates = [0.01, 0.0005]
     weight_decays = [0.0001, 0.0005]
-    epochs = 30
+    epochs = 25
 
     #best_model = None
     #best_loss = float("inf")
@@ -163,6 +192,7 @@ def main():
                 train_one_epoch(model, optimizer, train_loader, device)
 
             val_loss = evaluate(model, val_loader, device)
+            print(f"Validation loss for lr= {lr}, wd={wd}: {val_loss}")
             
 
             model_save_path = f"faster_rcnn_lr_{lr}_wd_{wd}.pth"
