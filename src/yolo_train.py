@@ -57,17 +57,40 @@ def evaluate_yolo(model, model_name, split="test", batch_size=16, imgsz=640, pre
     print(f"Results of {split} set successfully saved to: {results_file}")
 
 if __name__ == "__main__":
+    # fine tune the model
+    search_space = {
+      "lr0": (1e-6, 1e-1),
+      "degrees": (0.0, 45.0),
+    }
+
+    model = YOLO("yolo11s.pt")
+    lr_results = model.tune(
+        data="./yolo_config.yaml",
+        epochs=30,
+        iterations=10, # or more probably
+        space=search_space,
+        optimizer="AdamW", # or SGD myb
+        fraction=0.1,  # Use 10% of the dataset (set to more myb)
+        plots=True,
+        save=True,
+        val=False
+    )
+
+    print(f"Recommended learning rate: {lr_results['lr']}")
+    print(f"Results: {lr_results}")
+
     # train_yolo("yolo11s", batch_size=32)
     
     # load model
-    base_path = os.getcwd()
-    model_path = os.path.join(base_path, "./runs/train/yolo11s_bs32_pretrained/weights/best.pt")
-    model = YOLO(model_path)
+    # base_path = os.getcwd()
+    # model_path = os.path.join(base_path, "./runs/train/yolo11s_bs32_pretrained/weights/best.pt")
+    # model_path = r"C:\Users\Adam\Downloads\runs\runs\train\yolo11s_bs48_pretrained2\weights\best.pt"
+    # model = YOLO(model_path)
 
-    evaluate_yolo(model, "yolo11s", batch_size=32)
+    # evaluate_yolo(model, "yolo11s", batch_size=32)
 
     # # Perform object detection on a specific image
     # base_path = os.getcwd()
-    # image_path = os.path.join(base_path, r"src\set03_V008_0486.png")
-    # results = model(image_path)
+    # image_path = os.path.join(base_path, r"src\set07_V010_0516.png")
+    # results = model.predict(image_path, )
     # results[0].show()
