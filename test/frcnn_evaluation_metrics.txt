@@ -1,0 +1,20 @@
+Model: faster_rcnn_lr_0.01_wd_0.0001.pth
+Precision: 0.5220, Recall: 0.4594, F1 Score: 0.4890
+mAP@50: 0.4614, mAP@50-90: 0.3554
+
+Model: faster_rcnn_lr_0.01_wd_0.0005.pth
+Precision: 0.6050, Recall: 0.5424, F1 Score: 0.5716
+mAP@50: 0.5332, mAP@50-90: 0.4192
+
+Model: faster_rcnn_lr_0.0001_wd_0.0001.pth
+Precision: 0.8712, Recall: 0.8639, F1 Score: 0.8674
+mAP@50: 0.8466, mAP@50-90: 0.7818
+
+Model: faster_rcnn_lr_0.0001_wd_0.0005.pth
+Precision: 0.8856, Recall: 0.8849, F1 Score: 0.8851
+mAP@50: 0.8673, mAP@50-90: 0.8029
+
+
+
+
+
